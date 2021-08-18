@@ -123,7 +123,7 @@ class SFTPConnection():
 
         return files
 
-    def get_files(self, prefix, search_pattern, modified_since=None):
+    def get_files(self, prefix, search_pattern, modified_since=None, modified_until=None):
         files = self.get_files_by_prefix(prefix)
         if files:
             LOGGER.info('Found %s files in "%s"', len(files), prefix)
@@ -142,6 +142,8 @@ class SFTPConnection():
 
         if modified_since is not None:
             matching_files = [f for f in matching_files if f["last_modified"] > modified_since]
+        if modified_until is not None:
+            matching_files = [f for f in matching_files if f["last_modified"] <= modified_until]
 
         # sort files in increasing order of "last_modified"
         sorted_files = sorted(matching_files, key = lambda x: (x['last_modified']).timestamp())
