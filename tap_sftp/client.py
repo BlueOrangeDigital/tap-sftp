@@ -15,13 +15,19 @@ from paramiko.ssh_exception import AuthenticationException, SSHException
 LOGGER = singer.get_logger()
 
 class SFTPConnection():
-    def __init__(self, host, username, password=None, private_key_file=None, port=None):
+    def __init__(self, host, username, password=None, private_key=None, private_key_file=None, port=None):
         self.host = host
         self.username = username
         self.password = password
         self.port = int(port)or 22
         self.__active_connection = False
         self.key = None
+        if private_key:
+            keyfile = io.StringIO()
+            keyfile.write(private_key.replace("\\n", "\n"))
+            keyfile.seek(0)
+            self.key = paramiko.RSAKey.from_private_key(keyfile)
+
         if private_key_file:
             key_path = os.path.expanduser(private_key_file)
             self.key = paramiko.RSAKey.from_private_key_file(key_path)
@@ -172,4 +178,5 @@ def connection(config):
                           config['username'],
                           password=config.get('password'),
                           private_key_file=config.get('private_key_file'),
+                          private_key=config.get('private_key'),
                           port=config.get('port'))
